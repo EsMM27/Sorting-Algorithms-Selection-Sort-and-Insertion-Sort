@@ -19,6 +19,13 @@ Consider the following array of Integer values.
 
 
 2.Write the contents of the array for 4 passes of the outermost loop of selection sort.
+-5	11	34	22	3	40	9	16	6
+
+-5	3	34	22	11	40	9	16	6
+
+-5	3	6	22	11	40	9	16	34
+
+-5	3	6	9	11	40	22	16	34
 
 
 3.Create a Selection Sort class that has a sorting method that will accept an array as an argument and will return a sorted array.
