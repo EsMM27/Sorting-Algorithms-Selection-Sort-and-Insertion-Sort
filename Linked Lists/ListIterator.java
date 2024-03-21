@@ -39,6 +39,10 @@ public interface ListIterator
       @param element the element to set
    */
    void set(Object element);
+
+   Object previous();
+
+   boolean hasPrevious();
 } 
 
 /**

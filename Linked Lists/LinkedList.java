@@ -1,159 +1,153 @@
-import java.util.NoSuchElementException;                         
-/**A linked list is a sequence of nodes with efficient             
-element insertion and removal. This class             
-contains a subset of the methods of the standard             
-java.util.LinkedList class.*/
+import java.util.NoSuchElementException;
 
-public class LinkedList               
-{
-   private Node position;                  
-   private Node previous;                  
-   private Node first; 
-                             
-   /** Constructs an empty linked list.*/                   
-   public LinkedList()                  
-   {                       
-   first = null;                  
+public class LinkedList {
+   private Node first;
+   private Node last;
+
+   public LinkedList() {
+       first = null;
+       last = null;
    }
-   
-/**      Returns the first element in the linked list.               
-         @return the first element in the linked list               */                   
-   public Object getFirst()                  
-   {                       
-   if (first == null)                         
-   throw new NoSuchElementException();                     
-   return first.data;                  
-   }            
-   
-/**       Removes the first element in the linked list.               
-          @return the removed element               */                   
-public Object removeFirst() {
-    if (first == null)
-        throw new NoSuchElementException();
 
-    Object element = first.data;
-    first = first.next; // Update the reference to the first node
-    return element;
+   public Object getFirst() {
+       if (first == null)
+           throw new NoSuchElementException();
+       return first.data;
+   }
+
+   public Object getLast() {
+       if (last == null)
+           throw new NoSuchElementException();
+       return last.data;
+   }
+
+   public Object removeFirst() {
+       if (first == null)
+           throw new NoSuchElementException();
+
+       Object element = first.data;
+       first = first.next;
+       if (first != null)
+           first.prev = null; // Update the previous reference of the new first node
+       else
+           last = null; // If the list becomes empty after removal
+       return element;
+   }
+
+   public void addFirst(Object element) {
+       Node newNode = new Node();
+       newNode.data = element;
+       newNode.next = first;
+       newNode.prev = null;
+       if (first != null)
+           first.prev = newNode; // Update the previous reference of the current first node
+       first = newNode;
+       if (last == null)
+           last = newNode; // Update last reference if the list was empty
+   }
+
+   public void addLast(Object element) {
+       Node newNode = new Node();
+       newNode.data = element;
+       newNode.next = null;
+       newNode.prev = last;
+       if (last != null)
+           last.next = newNode;
+       last = newNode;
+       if (first == null)
+           first = newNode;
+   }
+
+   public ListIterator listIterator() {
+       return new LinkedListIterator();
+   }
+
+   private class Node {
+       public Object data;
+       public Node next;
+       public Node prev;
+   }
+
+   private class LinkedListIterator implements ListIterator {
+       private Node position;
+       private Node previous;
+
+       public LinkedListIterator() {
+           position = null;
+           previous = null;
+       }
+
+       public Object next() {
+           if (!hasNext())
+               throw new NoSuchElementException();
+           previous = position;
+           if (position == null)
+               position = first;
+           else
+               position = position.next;
+           return position.data;
+       }
+
+       public boolean hasNext() {
+           if (position == null)
+               return first != null;
+           else
+               return position.next != null;
+       }
+
+       public Object previous() {
+           if (!hasPrevious())
+               throw new NoSuchElementException();
+           position = position == null ? last : position.prev;
+           previous = position.prev;
+           return position.data;
+       }
+
+       public boolean hasPrevious() {
+           if (position == null)
+               return last != null;
+           else
+               return position.prev != null;
+       }
+
+       public void add(Object element) {
+           if (position == null) {
+               addFirst(element);
+               position = first;
+           } else {
+               Node newNode = new Node();
+               newNode.data = element;
+               newNode.next = position.next;
+               newNode.prev = position;
+               if (position.next != null)
+                   position.next.prev = newNode;
+               position.next = newNode;
+               position = newNode;
+           }
+           previous = position;
+       }
+
+       public void remove() {
+           if (previous == position)
+               throw new IllegalStateException();
+
+           if (position == first)
+               removeFirst();
+           else {
+               previous.next = position.next;
+               if (position.next != null)
+                   position.next.prev = previous;
+           }
+           position = previous;
+       }
+
+       public void set(Object element) {
+           if (position == null)
+               throw new NoSuchElementException();
+           position.data = element;
+       }
+   }
 }
-           
-/**   Adds an element to the front of the linked list.               
-      @param element the element to add               */                   
-      public void addFirst(Object element)                  
-      {                       
-      Node newNode = new Node();                     
-      newNode.data = element;                     
-      newNode.next = first;                     
-      first = newNode;                  
-      }    
-/**    Adds an element to the end of the linked list.               
-      @param element the element to add               */ 
-      public void addLast(Object element) {
-         if (first == null) {
-             addFirst(element); // If the list is empty, simply add the element at the beginning
-         } else {
-             Node newNode = new Node();
-             newNode.data = element;
-             Node current = first;
-             while (current.next != null) {
-                 current = current.next;
-             }
-             current.next = newNode;
-         }
-     }
-   
-/**   Returns an iterator for iterating through this list.               
-      @return an iterator for iterating through this list              */                   
-      public ListIterator listIterator()                  
-      {                       
-      return new LinkedListIterator();                  
-      }            
-   private class Node                  
-   {                       
-   public Object data;                     
-   public Node next;                  
-   }                                  
-   
-   private class LinkedListIterator implements ListIterator                  
-   {                    
-   /**      Constructs an iterator that points to the front                  
-            of the linked list.                  */                      
-            public LinkedListIterator()                    
-            {                          
-            position = null;                        
-            previous = null;                     
-            }            
-            
-            
-/**         Moves the iterator past the next element.
-            @return the traversed element                  */                       
-            public Object next()                     
-            {                          
-            if (!hasNext())                           
-            throw new NoSuchElementException();                        
-            previous = position; 
-            // Remember for remove                                             
-               if (position == null)                           
-               position = first;                        
-               else                           
-               position = position.next;                        
-            return position.data;                     
-            }            
-/**                  Tests if there is an element after the iterator position.
-                   @return true if there is an element after the                   
-                   // iterator position                  */                      
-                   public boolean hasNext()                     
-                   {                          
-                      if (position == null)                           
-                      return first != null;                        
-                      else                           
-                      return position.next != null;                     
-                   }            
-/**                  Adds an element before the iterator position                  
-                     and moves the iterator past the inserted element.                  
-                     @param element the element to add                  */                       
-                     public void add(Object element)                     
-                     {                          
-                        if (position == null)                        
-                        {                           
-                        addFirst(element);                           
-                        position = first;                        
-                        }                        
-                        else                        
-                        {                             
-                        Node newNode = new Node();                           
-                        newNode.data = element;                           
-                        newNode.next = position.next;                           
-                        position.next = newNode;                           
-                        position = newNode;                        
-                        }                        
-                     previous = position;                     
-                     }
-/**                  Removes the last traversed element. This method may                  
-                     only be called after a call to the next() method.                  */                      
-                     public void remove()                     
-                     {                          
-                        if (previous == position)                           
-                        throw new IllegalStateException();                                             
-                           if (position == first)                        
-                           {                           
-                           removeFirst();                        
-                           }                        
-                           else                         
-                           {                             
-                           previous.next = position.next;                        
-                           }                         
-                           position = previous;                     
-                           }
-/**                  Sets the last traversed element to a different value.
-                     @param element the element to set                  */                      
-                     public void set(Object element)                     
-                     {                        
-                        if (position == null)                           
-                        throw new NoSuchElementException();                        
-                     position.data = element;                     
-                     }                                  
-        }               
-} 
 
 /**A linked list is a linear data structure where elements are stored in nodes. Each node consists of a data element and a reference (or pointer) to the next node in the sequence.
 
