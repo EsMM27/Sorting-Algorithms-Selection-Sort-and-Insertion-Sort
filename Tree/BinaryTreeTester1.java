@@ -1,4 +1,4 @@
-package Tree;
+//package Tree;
 
 //import com.adsg.tree.BinarySearchTree;
 //import com.misc.Person;
@@ -8,22 +8,29 @@ public class BinaryTreeTester1 {
 	public static void main(String[] args) {
 		BinarySearchTree<Integer> myTree = new BinarySearchTree<Integer>();
 		
-		myTree.insert(40);//Note the use of primitive ints - they are auto-boxed into Integer objects.
-		myTree.insert(32);
-		myTree.insert(37);
-		myTree.insert(34);
-		myTree.insert(26);
-		myTree.insert(29);
-		myTree.insert(18);
-		myTree.insert(20);
-		myTree.insert(10);
-		myTree.insert(49);
-		myTree.insert(60);
-		myTree.insert(70);
-		myTree.insert(80);
-		myTree.insert(75);
-		myTree.insert(55);
-		
+		// myTree.insert(40);//Note the use of primitive ints - they are auto-boxed into Integer objects.
+		// myTree.insert(32);
+		// myTree.insert(37);
+		// myTree.insert(34);
+		// myTree.insert(26);
+		// myTree.insert(29);
+		// myTree.insert(18);
+		// myTree.insert(20);
+		// myTree.insert(10);
+		// myTree.insert(49);
+		// myTree.insert(60);
+		// myTree.insert(70);
+		// myTree.insert(80);
+		// myTree.insert(75);
+		// myTree.insert(55);
+
+		myTree.insert(50);//Note the use of primitive ints - they are auto-boxed into Integer objects.
+		myTree.insert(31);
+		myTree.insert(69);
+		myTree.insert(57);
+		myTree.insert(90);
+		myTree.insert(99);
+
 		// BinarySearchTree<String> myTree = new BinarySearchTree<String>();
 		// myTree.insert("adc");
 		// myTree.insert("qwe");
@@ -68,7 +75,19 @@ public class BinaryTreeTester1 {
 		
 		System.out.println("Find Minimum: "+myTree.findMinimum());
 				
-		System.out.println(myTree.find(80));
+		System.out.println("Found value: " + myTree.find(80));
+
+		System.out.println("Pre-order Traversal before left rotation:");
+		myTree.preOrderTraversal();
+
+		myTree.rotateLeft(); //Rotate the whole tree left
+
+
+		System.out.println("Pre-order Traversal after left rotation:");
+		myTree.preOrderTraversal();
+
+
+
 	}
 
 }

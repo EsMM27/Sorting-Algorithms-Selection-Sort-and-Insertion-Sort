@@ -1,4 +1,4 @@
-package Tree;
+//package Tree;
 
 
 /**
@@ -238,4 +238,64 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
 		
 	}
+
+    // public void rotateLeft() {
+
+    //     if (root == null || root.left == null) {
+    //         return; // Cannot rotate left
+    //     }
+
+    //     Node pivot = root.right;
+	// 	Node t2 = pivot.left;
+	// 	pivot.left = root;
+
+	// 	root.right = t2;
+	// 	root = pivot;
+
+	// }
+
+	public void rotateLeft() {
+    if (root == null || root.right == null) {
+        return; // Cannot rotate left
+    }
+    root = rotateSubTreeLeft(root); // Rotate the root itself
+}
+
+	public void rotateRight() {
+    if (root == null || root.left == null) {
+        return; // Cannot rotate right
+    }
+    root = rotateSubTreeRight(root); // Rotate the root itself
+}
+
+	public Node rotateSubTreeLeft(Node subTreeRoot){
+		if (subTreeRoot == null || subTreeRoot.right == null) {
+			return null; // Cannot rotate left
+		}
+
+		Node pivot = subTreeRoot.right;
+		Node t2 = pivot.left;
+		pivot.left = subTreeRoot;
+
+		subTreeRoot.right = t2;
+
+		return pivot;
+	}
+
+	public Node rotateSubTreeRight(Node subTreeRoot){
+		if (subTreeRoot == null || subTreeRoot.left == null) {
+			return null; // Cannot rotate right
+		}
+
+		Node pivot = subTreeRoot.left;
+		Node t2 = pivot.right;
+		pivot.right = subTreeRoot;
+
+		subTreeRoot.left = t2;
+
+		return pivot;
+
+
+	}
+
 }
