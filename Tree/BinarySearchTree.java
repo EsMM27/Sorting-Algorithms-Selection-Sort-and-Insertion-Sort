@@ -28,17 +28,16 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * @param value Object to insert into the tree
 	 */
 	public void insert(T value){
-		Node node = new Node(value); // Create the Node to add
+		Node node = new Node(value); // Create the node
 
-		//Special case that cannot be handled recursively
 		if ( root == null ) {
 			root = node;
+			root.parent = null;
 			return;
 		}
 
-		//Initially we start at the root. Each subsequent recursive call will be to a 
-		//left or right subtree.
 		insertRec(root, node);
+		handleRedBlack(node); // Handle Red-Black tree balancing and coloring
 
 	}
 
@@ -57,6 +56,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 			//no leaf node there so that is obviously where we must insert
 			if ( subTreeRoot.left == null ){
 				subTreeRoot.left = node;
+				node.parent = subTreeRoot; // Set parent reference
 				return; //return here is unnecessary
 			}
 			else{ // Note that this allows duplicates!
@@ -69,12 +69,80 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		else{
 			if (subTreeRoot.right == null){
 				subTreeRoot.right = node;
+				node.parent = subTreeRoot; // Set parent reference
 				return;
 			}
 			else{
 				insertRec(subTreeRoot.right, node);
 			}
 		}
+	}
+
+	private void handleRedBlack(Node newNode) {
+    // Handle Red-Black tree violations and balancing
+    // This is where you'll implement the Red-Black tree logic
+    
+		if (newNode == root) {
+			newNode.nodeColourRed = false; // Root must be black
+			return;
+		}
+
+		Node uncle;
+		Node parent = newNode.parent;
+		Node grandparent = parent.parent;
+		//Now that it's inserted we try to ensure that it's a RedBlack Tree 
+		//Check if parent is red. This is a violation. I (the new node) am red 
+		//so my parent cannot also be red! 
+		if(parent.nodeColourRed) 
+  { 
+   //important that we figure out where the uncle is 
+   //relative to the current node 
+   if(uncleOnRightTree(newNode)) 
+   { 
+    uncle = getRightUncle(newNode); 
+   } 
+   else 
+   { 
+    uncle = getLeftUncle(newNode); 
+   } 
+ 
+   //Now we need to check if x's uncle is RED (Grandparent must  
+    //have been black) 
+   //This is case 3 according to the video  
+   //(https://www.youtube.com/watch?v=g9SaX0yeneU) 
+   if((uncle != null) && (uncle.nodeColourRed)){
+	//this is case 3 according to video
+	parent.nodeColourRed = false; 
+	uncle.nodeColourRed = false; 
+	grandparent.nodeColourRed = true; 
+	handleRedBlack(grandparent); // Recur on grandparent
+   }
+   
+	}
+   }
+	
+	private boolean uncleOnRightTree(Node node) {
+		if (node.parent == null || node.parent.parent == null) {
+			return false;
+		}
+		Node parent = node.parent;
+		Node grandparent = parent.parent;
+		// If parent is left child of grandparent, uncle is on right
+		return grandparent.left == parent;
+	}
+	
+	private Node getRightUncle(Node node) {
+		if (node.parent == null || node.parent.parent == null) {
+			return null;
+		}
+		return node.parent.parent.right;
+	}
+	
+	private Node getLeftUncle(Node node) {
+		if (node.parent == null || node.parent.parent == null) {
+			return null;
+		}
+		return node.parent.parent.left;
 	}
 	
 	
@@ -105,7 +173,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 */
 	private void recInOrderTraversal(Node subTreeRoot)
 	{
-		if(subTreeRoot == null) return;
+		if(subTreeRoot == null) return; // Add return statement
 		
 		recInOrderTraversal(subTreeRoot.left);
 		processNode(subTreeRoot);
@@ -114,7 +182,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	
 	private void recPreOrderTraversal (Node subTreeRoot)
 	{
-		if(subTreeRoot == null) return;
+		if(subTreeRoot == null) return; // Add return statement
 		
 		processNode(subTreeRoot);
 		recPreOrderTraversal(subTreeRoot.left);
@@ -123,7 +191,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	
 	private void recPostOrderTraversal (Node subTreeRoot)
 	{
-		if(subTreeRoot == null) return;
+		if(subTreeRoot == null) return; // Add return statement
 		
 		recPostOrderTraversal(subTreeRoot.left);
 		recPostOrderTraversal(subTreeRoot.right);
@@ -156,7 +224,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 */
 	private int recCountNodes(Node subTreeRoot)
 	{
-		if (subTreeRoot == null) return 0;
+		if (subTreeRoot == null) return 0; // Add return statement
 		
 		//Look at the pre-order. "Count this node and THEN count the left and right 
 		//subtrees recursively
@@ -170,21 +238,43 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 *
 	 */
 	private class Node {
-		public T value; //value is the actual object that we are storing
-		public Node left;
-		public Node right;
+	    public T value; //value is the actual object that we are storing
+	    public Node left;
+	    public Node right;
+	    public Node parent; // Reference to parent node
+	    public boolean nodeColourRed; // true = red, false = black
 
-		public Node(T value) {
-			this.value = value;
-		}
+	    public Node(T value) {
+	        this.value = value;
+	        this.left = null;
+	        this.right = null;
+	        this.parent = null;
+	        this.nodeColourRed = true; // New nodes are typically red in Red-Black trees
+	    }
 
-		@Override
-		public String toString() {
-			return "Node [value=" + value + "]";
-		}
-		
-		
+	    // Additional constructor with parent parameter
+	    public Node(T value, Node parent) {
+	        this.value = value;
+	        this.left = null;
+	        this.right = null;
+	        this.parent = parent;
+	        this.nodeColourRed = true; // New nodes are typically red in Red-Black trees
+	    }
 
+	    // Constructor with all parameters
+	    public Node(T value, Node parent, boolean isRed) {
+	        this.value = value;
+	        this.left = null;
+	        this.right = null;
+	        this.parent = parent;
+	        this.nodeColourRed = isRed;
+	    }
+
+	    @Override
+	    public String toString() {
+	        String color = nodeColourRed ? "RED" : "BLACK";
+	        return "Node [value=" + value + ", color=" + color + "]";
+	    }
 	}
 
 	public T findMaximum() {
