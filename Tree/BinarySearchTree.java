@@ -33,6 +33,8 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		if ( root == null ) {
 			root = node;
 			root.parent = null;
+			// Let the Red-Black handler fix colouring (root should end up black)
+			handleRedBlack(root);
 			return;
 		}
 
@@ -89,37 +91,72 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
 		Node uncle;
 		Node parent = newNode.parent;
+		// If parent has no parent, parent is root — ensure it's black and we're done
+		if (parent.parent == null) {
+			parent.nodeColourRed = false;
+			return;
+		}
 		Node grandparent = parent.parent;
-		//Now that it's inserted we try to ensure that it's a RedBlack Tree 
-		//Check if parent is red. This is a violation. I (the new node) am red 
-		//so my parent cannot also be red! 
-		if(parent.nodeColourRed) 
-  { 
-   //important that we figure out where the uncle is 
-   //relative to the current node 
-   if(uncleOnRightTree(newNode)) 
-   { 
-    uncle = getRightUncle(newNode); 
-   } 
-   else 
-   { 
-    uncle = getLeftUncle(newNode); 
-   } 
- 
-   //Now we need to check if x's uncle is RED (Grandparent must  
-    //have been black) 
-   //This is case 3 according to the video  
-   //(https://www.youtube.com/watch?v=g9SaX0yeneU) 
-   if((uncle != null) && (uncle.nodeColourRed)){
-	//this is case 3 according to video
-	parent.nodeColourRed = false; 
-	uncle.nodeColourRed = false; 
-	grandparent.nodeColourRed = true; 
-	handleRedBlack(grandparent); // Recur on grandparent
-   }
-   
+		// Now that it's inserted we try to ensure that it's a Red-Black Tree.
+		// If parent is red that's a violation (new node is red by default)
+		if (parent.nodeColourRed) {
+			// determine uncle
+			if (uncleOnRightTree(newNode)) {
+				uncle = getRightUncle(newNode);
+			} else {
+				uncle = getLeftUncle(newNode);
+			}
+
+			// Case: uncle is RED -> recolour parent and uncle to BLACK, grandparent to RED and recur
+			if ((uncle != null) && (uncle.nodeColourRed)) {
+				parent.nodeColourRed = false;
+				uncle.nodeColourRed = false;
+				grandparent.nodeColourRed = true;
+				handleRedBlack(grandparent); // Recur on grandparent
+				return;
+			}
+
+			// Case: uncle is BLACK (or null) -> rotations + recolour
+			// Handle four subcases (mirror of each other). We convert inside case to outside case
+			if (parent == grandparent.left) {
+				// parent is left child of grandparent
+				if (newNode == parent.right) {
+					// inside (left-right) case: rotate left on parent to convert to left-left
+					Node pivot = rotateSubTreeLeft(parent);
+					replaceParentChild(parent, pivot);
+					// After rotation, treat original parent as the newNode for the next step
+					newNode = parent;
+					parent = newNode.parent;
+					grandparent = parent.parent;
+				}
+
+				// outside (left-left) case
+				parent.nodeColourRed = false;
+				grandparent.nodeColourRed = true;
+				Node newRoot = rotateSubTreeRight(grandparent);
+				replaceParentChild(grandparent, newRoot);
+			} else {
+				// parent is right child of grandparent (mirror)
+				if (newNode == parent.left) {
+					// inside (right-left) case: rotate right on parent to convert to right-right
+					Node pivot = rotateSubTreeRight(parent);
+					replaceParentChild(parent, pivot);
+					newNode = parent;
+					parent = newNode.parent;
+					grandparent = parent.parent;
+				}
+
+				// outside (right-right) case
+				parent.nodeColourRed = false;
+				grandparent.nodeColourRed = true;
+				Node newRoot = rotateSubTreeLeft(grandparent);
+				replaceParentChild(grandparent, newRoot);
+			}
+
+			// Ensure root remains black
+			if (root != null) root.nodeColourRed = false;
+		}
 	}
-   }
 	
 	private boolean uncleOnRightTree(Node node) {
 		if (node.parent == null || node.parent.parent == null) {
@@ -143,6 +180,24 @@ public class BinarySearchTree<T extends Comparable<T>> {
 			return null;
 		}
 		return node.parent.parent.left;
+	}
+
+	/**
+	 * Replace oldRoot (which was a child of its parent) with newRoot in the parent's links.
+	 * Also fix parent pointers. If oldRoot was root, update tree root.
+	 */
+	private void replaceParentChild(Node oldRoot, Node newRoot) {
+		Node p = oldRoot.parent;
+		if (p == null) {
+			root = newRoot;
+			if (newRoot != null) newRoot.parent = null;
+		} else if (p.left == oldRoot) {
+			p.left = newRoot;
+			if (newRoot != null) newRoot.parent = p;
+		} else {
+			p.right = newRoot;
+			if (newRoot != null) newRoot.parent = p;
+		}
 	}
 	
 	
@@ -365,9 +420,15 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
 		Node pivot = subTreeRoot.right;
 		Node t2 = pivot.left;
-		pivot.left = subTreeRoot;
 
+		// Perform rotation
+		pivot.left = subTreeRoot;
 		subTreeRoot.right = t2;
+
+		// Update parent pointers
+		pivot.parent = subTreeRoot.parent;
+		subTreeRoot.parent = pivot;
+		if (t2 != null) t2.parent = subTreeRoot;
 
 		return pivot;
 	}
@@ -379,9 +440,15 @@ public class BinarySearchTree<T extends Comparable<T>> {
 
 		Node pivot = subTreeRoot.left;
 		Node t2 = pivot.right;
-		pivot.right = subTreeRoot;
 
+		// Perform rotation
+		pivot.right = subTreeRoot;
 		subTreeRoot.left = t2;
+
+		// Update parent pointers
+		pivot.parent = subTreeRoot.parent;
+		subTreeRoot.parent = pivot;
+		if (t2 != null) t2.parent = subTreeRoot;
 
 		return pivot;
 
