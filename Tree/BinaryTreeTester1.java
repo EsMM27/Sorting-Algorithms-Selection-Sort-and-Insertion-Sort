@@ -6,7 +6,7 @@
 public class BinaryTreeTester1 {
 
 	public static void main(String[] args) {
-		BinarySearchTree<Integer> myTree = new BinarySearchTree<Integer>();
+		RedBlackTree<Integer> myTree = new RedBlackTree<Integer>();
 		
 		// myTree.insert(40);//Note the use of primitive ints - they are auto-boxed into Integer objects.
 		// myTree.insert(32);

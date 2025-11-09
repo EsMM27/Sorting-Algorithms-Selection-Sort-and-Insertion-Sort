@@ -1,7 +1,7 @@
 public class RedBlackConsoleTester {
 
     public static void main(String[] args) {
-        BinarySearchTree<Integer> tree = new BinarySearchTree<>();
+        RedBlackTree<Integer> tree = new RedBlackTree<>();
 
         // Insert values into the tree
         tree.insert(10);

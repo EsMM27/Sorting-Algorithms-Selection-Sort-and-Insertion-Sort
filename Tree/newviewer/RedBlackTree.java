@@ -1,4 +1,4 @@
-//package Tree;
+package newviewer;
 
 
 /**
@@ -15,7 +15,7 @@
  *
  * @param <T>
  */
-public class BinarySearchTree<T extends Comparable<T>> {
+public class RedBlackTree<T extends Comparable<T>> {
 	/**
 	 * Reference to the root of the tree
 	 */
@@ -48,7 +48,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * @param subTreeRoot The SubTree to insert into
 	 * @param node The Node that we wish to insert
 	 */
-	private void insertRec(Node subTreeRoot, Node node){
+	protected void insertRec(Node subTreeRoot, Node node){
 
 		//Note the call to the compareTo() method. This is only possible if our objects implement
 		//the Comparable interface.
@@ -80,10 +80,17 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		}
 	}
 
-	private void handleRedBlack(Node newNode) {
-    // Handle Red-Black tree violations and balancing
-    // This is where you'll implement the Red-Black tree logic
-    
+	/**
+	 * Fixes Red-Black tree violations after insertion.
+	 * Handles two main cases:
+	 * 1. RED uncle: recolor parent, uncle, and grandparent, then recurse up
+	 * 2. BLACK uncle: perform rotations and recolor to restore balance
+	 * 
+	 * @param newNode The newly inserted node that may cause violations
+	 */
+	protected void handleRedBlack(Node newNode) {
+		// Handle Red-Black tree violations and balancing
+		
 		if (newNode == root) {
 			newNode.nodeColourRed = false; // Root must be black
 			return;
@@ -97,6 +104,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 			return;
 		}
 		Node grandparent = parent.parent;
+		
 		// Now that it's inserted we try to ensure that it's a Red-Black Tree.
 		// If parent is red that's a violation (new node is red by default)
 		if (parent.nodeColourRed) {
@@ -158,7 +166,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		}
 	}
 	
-	private boolean uncleOnRightTree(Node node) {
+	protected boolean uncleOnRightTree(Node node) {
 		if (node.parent == null || node.parent.parent == null) {
 			return false;
 		}
@@ -168,14 +176,14 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		return grandparent.left == parent;
 	}
 	
-	private Node getRightUncle(Node node) {
+	protected Node getRightUncle(Node node) {
 		if (node.parent == null || node.parent.parent == null) {
 			return null;
 		}
 		return node.parent.parent.right;
 	}
 	
-	private Node getLeftUncle(Node node) {
+	protected Node getLeftUncle(Node node) {
 		if (node.parent == null || node.parent.parent == null) {
 			return null;
 		}
@@ -185,8 +193,15 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	/**
 	 * Replace oldRoot (which was a child of its parent) with newRoot in the parent's links.
 	 * Also fix parent pointers. If oldRoot was root, update tree root.
+	 * 
+	 * CRITICAL: This method must be called AFTER rotation to properly update parent pointers.
+	 * The rotation methods only update tree structure (left/right pointers) and leave
+	 * parent pointer updates to this method.
+	 * 
+	 * @param oldRoot The node being replaced (typically the node that was rotated)
+	 * @param newRoot The node replacing oldRoot (typically the pivot from rotation)
 	 */
-	private void replaceParentChild(Node oldRoot, Node newRoot) {
+	protected void replaceParentChild(Node oldRoot, Node newRoot) {
 		Node p = oldRoot.parent;
 		if (p == null) {
 			root = newRoot;
@@ -197,6 +212,12 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		} else {
 			p.right = newRoot;
 			if (newRoot != null) newRoot.parent = p;
+		}
+		
+		// After rotation, oldRoot becomes a child of newRoot
+		// Update oldRoot's parent pointer to point to newRoot
+		if (newRoot != null) {
+			oldRoot.parent = newRoot;
 		}
 	}
 	
@@ -226,7 +247,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * This allows us to recursively process the tree "in-order". Note that it is private
 	 * @param subTreeRoot
 	 */
-	private void recInOrderTraversal(Node subTreeRoot)
+	protected void recInOrderTraversal(Node subTreeRoot)
 	{
 		if(subTreeRoot == null) return; // Add return statement
 		
@@ -235,7 +256,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		recInOrderTraversal(subTreeRoot.right);
 	}
 	
-	private void recPreOrderTraversal (Node subTreeRoot)
+	protected void recPreOrderTraversal (Node subTreeRoot)
 	{
 		if(subTreeRoot == null) return; // Add return statement
 		
@@ -244,7 +265,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		recPreOrderTraversal(subTreeRoot.right);
 	}
 	
-	private void recPostOrderTraversal (Node subTreeRoot)
+	protected void recPostOrderTraversal (Node subTreeRoot)
 	{
 		if(subTreeRoot == null) return; // Add return statement
 		
@@ -257,7 +278,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * Do some "work" on the node - here we just print it out 
 	 * @param currNode
 	 */
-	private void processNode(Node currNode)
+	protected void processNode(Node currNode)
 	{
 		System.out.println(currNode.toString());
 	}
@@ -277,7 +298,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * @param subTreeRoot
 	 * @return
 	 */
-	private int recCountNodes(Node subTreeRoot)
+	protected int recCountNodes(Node subTreeRoot)
 	{
 		if (subTreeRoot == null) return 0; // Add return statement
 		
@@ -292,7 +313,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 	 * @author dermot.hegarty
 	 *
 	 */
-	private class Node {
+	protected class Node {
 	    public T value; //value is the actual object that we are storing
 	    public Node left;
 	    public Node right;
@@ -348,7 +369,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		return recFindMinimum(root);
 	}
 
-	private T recFindMinimum(Node subTreeRoot) {
+	protected T recFindMinimum(Node subTreeRoot) {
 		if (subTreeRoot == null) {
 			return null; // Base case: empty subtree
 		}
@@ -364,7 +385,7 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		return recFind(root, searchVal);
 	}
 
-	private T recFind(Node subTreeRoot, T searchVal){
+	protected T recFind(Node subTreeRoot, T searchVal){
 		if (subTreeRoot == null){
 			return null;
 		}
@@ -384,21 +405,6 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		
 	}
 
-    // public void rotateLeft() {
-
-    //     if (root == null || root.left == null) {
-    //         return; // Cannot rotate left
-    //     }
-
-    //     Node pivot = root.right;
-	// 	Node t2 = pivot.left;
-	// 	pivot.left = root;
-
-	// 	root.right = t2;
-	// 	root = pivot;
-
-	// }
-
 	public void rotateLeft() {
     if (root == null || root.right == null) {
         return; // Cannot rotate left
@@ -413,6 +419,23 @@ public class BinarySearchTree<T extends Comparable<T>> {
     root = rotateSubTreeRight(root); // Rotate the root itself
 }
 
+	/**
+	 * Performs a left rotation on the given subtree.
+	 * 
+	 * Before:         After:
+	 *     X             Y
+	 *    / \           / \
+	 *   A   Y    =>   X   C
+	 *      / \       / \
+	 *     B   C     A   B
+	 * 
+	 * IMPORTANT: Only updates tree structure (left/right pointers) and T2's parent.
+	 * Does NOT update subTreeRoot's or pivot's parent pointers - that's handled by
+	 * replaceParentChild() to avoid corrupting parent references.
+	 * 
+	 * @param subTreeRoot The root of the subtree to rotate (X in diagram)
+	 * @return The new root of the subtree after rotation (Y in diagram)
+	 */
 	public Node rotateSubTreeLeft(Node subTreeRoot){
 		if (subTreeRoot == null || subTreeRoot.right == null) {
 			return null; // Cannot rotate left
@@ -421,18 +444,33 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		Node pivot = subTreeRoot.right;
 		Node t2 = pivot.left;
 
-		// Perform rotation
+		// Perform rotation - ONLY update tree structure (left/right pointers)
 		pivot.left = subTreeRoot;
 		subTreeRoot.right = t2;
 
-		// Update parent pointers
-		pivot.parent = subTreeRoot.parent;
-		subTreeRoot.parent = pivot;
+		// ONLY update T2's parent pointer - replaceParentChild will handle the rest!
 		if (t2 != null) t2.parent = subTreeRoot;
 
 		return pivot;
 	}
 
+	/**
+	 * Performs a right rotation on the given subtree.
+	 * 
+	 * Before:         After:
+	 *       X           Y
+	 *      / \         / \
+	 *     Y   C  =>   A   X
+	 *    / \             / \
+	 *   A   B           B   C
+	 * 
+	 * IMPORTANT: Only updates tree structure (left/right pointers) and T2's parent.
+	 * Does NOT update subTreeRoot's or pivot's parent pointers - that's handled by
+	 * replaceParentChild() to avoid corrupting parent references.
+	 * 
+	 * @param subTreeRoot The root of the subtree to rotate (X in diagram)
+	 * @return The new root of the subtree after rotation (Y in diagram)
+	 */
 	public Node rotateSubTreeRight(Node subTreeRoot){
 		if (subTreeRoot == null || subTreeRoot.left == null) {
 			return null; // Cannot rotate right
@@ -441,18 +479,14 @@ public class BinarySearchTree<T extends Comparable<T>> {
 		Node pivot = subTreeRoot.left;
 		Node t2 = pivot.right;
 
-		// Perform rotation
+		// Perform rotation - ONLY update tree structure (left/right pointers)
 		pivot.right = subTreeRoot;
 		subTreeRoot.left = t2;
 
-		// Update parent pointers
-		pivot.parent = subTreeRoot.parent;
-		subTreeRoot.parent = pivot;
+		// ONLY update T2's parent pointer - replaceParentChild will handle the rest!
 		if (t2 != null) t2.parent = subTreeRoot;
 
 		return pivot;
-
-
 	}
 
 }
