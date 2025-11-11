@@ -190,6 +190,7 @@ public class KruskalMST {
                 // If roots are different, adding this edge won't create cycle
                 if (srcRoot != destRoot) {
                     mst.add(currentEdge);
+                    // Perform union to merge sets
                     ds.union(currentEdge.src, currentEdge.dest);
                     edgeCount++;
                     System.out.println("  ✓ ADDED to MST (no cycle)");
@@ -209,6 +210,8 @@ public class KruskalMST {
             System.out.println("\n=== Graph Structure ===");
             System.out.println("Vertices: " + vertices);
             System.out.println("Edges:");
+
+            // Display all edges
             for (Edge e : edges) {
                 System.out.println("  " + e);
             }
@@ -222,6 +225,7 @@ public class KruskalMST {
         System.out.println("=== Minimum Spanning Tree ===");
         int totalWeight = 0;
         
+        // Display all edges in the MST
         for (Edge e : mst) {
             System.out.println("  " + e);
             totalWeight += e.weight;
